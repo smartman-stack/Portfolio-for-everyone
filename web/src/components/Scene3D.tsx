@@ -10,6 +10,8 @@ import {
   Icosahedron,
   TorusKnot,
   Octahedron,
+  Edges,
+  Float,
   useTexture,
 } from "@react-three/drei";
 import * as THREE from "three";
@@ -47,20 +49,41 @@ function AnimatedSphere({ speed = 1.0 }: { speed?: number }) {
 
   return (
     <group position={[0, 0, 0]}>
-      <Sphere ref={earthRef} args={[1, 128, 128]} scale={2.6}>
+      <pointLight position={[0, 0, 3]} intensity={1.1} color="#ffd166" distance={8} decay={2.2} />
+      <Sphere ref={earthRef} args={[1, 128, 128]} scale={2.55}>
         <meshPhongMaterial
           map={earthMap}
           normalMap={normalMap}
           specularMap={specularMap}
-          shininess={15}
+          shininess={22}
+          emissive="#1b2a44"
+          emissiveIntensity={0.45}
         />
       </Sphere>
-      <Sphere ref={cloudsRef} args={[1.02, 64, 64]} scale={2.7}>
+      <Sphere ref={cloudsRef} args={[1.01, 64, 64]} scale={2.65}>
         <meshPhongMaterial
           map={cloudsMap}
           transparent
-          opacity={0.5}
+          opacity={0.45}
           depthWrite={false}
+        />
+      </Sphere>
+      <Sphere args={[1.1, 48, 48]} scale={2.9}>
+        <meshBasicMaterial
+          color="#ffd166"
+          transparent
+          opacity={0.18}
+          blending={THREE.AdditiveBlending}
+          side={THREE.BackSide}
+        />
+      </Sphere>
+      <Sphere args={[1.12, 48, 48]} scale={3.05}>
+        <meshBasicMaterial
+          color="#ff9f1c"
+          transparent
+          opacity={0.1}
+          blending={THREE.AdditiveBlending}
+          side={THREE.BackSide}
         />
       </Sphere>
     </group>
@@ -73,6 +96,16 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
   const fineLayerRef = useRef<THREE.Points>(null);
   const [starTexture, setStarTexture] = useState<THREE.Texture | null>(null);
   const [sparkTexture, setSparkTexture] = useState<THREE.Texture | null>(null);
+  const warmHex = useMemo(() => {
+    const base = new THREE.Color(color || "#22d3ee");
+    const warm = new THREE.Color("#ffd166");
+    return `#${base.lerp(warm, 0.65).getHexString()}`;
+  }, [color]);
+  const accentHex = useMemo(() => {
+    const accent = new THREE.Color(warmHex);
+    accent.offsetHSL(-0.05, -0.08, 0.12);
+    return `#${accent.getHexString()}`;
+  }, [warmHex]);
 
   const createPositions = (count: number, spread: THREE.Vector3) => {
     const positions = new Float32Array(count * 3);
@@ -164,8 +197,8 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
       ref.current.geometry.computeBoundingSphere();
     };
 
-    updateLayer(midLayerRef, midBaseRef, 0.18, 1);
-    updateLayer(fineLayerRef, fineBaseRef, 0.12, 1.35);
+    updateLayer(midLayerRef, midBaseRef, 0.14, 1.05);
+    updateLayer(fineLayerRef, fineBaseRef, 0.09, 1.35);
   });
 
   return (
@@ -180,8 +213,8 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.075}
-          color={new THREE.Color(color).offsetHSL(0.02, 0.1, 0.05)}
+          size={0.055}
+          color={warmHex}
           map={starTexture ?? undefined}
           alphaTest={0.25}
           transparent
@@ -200,8 +233,8 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.045}
-          color={new THREE.Color(color).offsetHSL(-0.04, -0.05, 0.1)}
+          size={0.032}
+          color={accentHex}
           map={sparkTexture ?? starTexture ?? undefined}
           alphaTest={0.2}
           transparent
@@ -211,12 +244,12 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
         />
       </points>
       <Sparkles
-        count={160}
+        count={180}
         scale={[14, 10, 14]}
-        speed={0.35 + speed * 0.25}
-        opacity={0.45}
-        color={color}
-        size={3}
+        speed={0.32 + speed * 0.22}
+        opacity={0.42}
+        color={warmHex}
+        size={1.6}
       />
     </group>
   );
@@ -224,50 +257,69 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
 
 function GeometricShapes({ color = "#0ea5e9", speed = 1.0 }: { color?: string; speed?: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  
+  const primaryHex = useMemo(() => {
+    const base = new THREE.Color(color);
+    const target = new THREE.Color("#8b5cf6");
+    return `#${base.lerp(target, 0.35).getHexString()}`;
+  }, [color]);
+  const accentHex = useMemo(() => {
+    const c = new THREE.Color(color);
+    c.offsetHSL(0.12, 0.08, 0.18);
+    return `#${c.getHexString()}`;
+  }, [color]);
+
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.x = state.clock.elapsedTime * 0.1 * speed;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15 * speed;
+      groupRef.current.rotation.x = state.clock.elapsedTime * 0.12 * speed;
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.18 * speed;
     }
   });
 
   return (
-    <group ref={groupRef}>
-      <Icosahedron args={[1.3, 1]}>
-        <meshPhysicalMaterial
-          color={color}
-          transparent
-          opacity={0.55}
-          transmission={0.85}
-          thickness={0.6}
-          roughness={0.15}
-          metalness={0.2}
-        />
-      </Icosahedron>
-      <TorusKnot position={[2.6, 0, -0.5]} args={[0.7, 0.2, 180, 16]}>
-        <meshPhysicalMaterial
-          color={new THREE.Color(color).offsetHSL(0.08, 0, 0.1)}
-          transparent
-          opacity={0.65}
-          transmission={0.75}
-          thickness={0.4}
-          roughness={0.25}
-          metalness={0.3}
-        />
-      </TorusKnot>
-      <Octahedron position={[-2.4, 0.2, 0.6]} args={[1, 0]}>
-        <meshPhysicalMaterial
-          color={new THREE.Color(color).offsetHSL(-0.05, 0.05, 0.05)}
-          transparent
-          opacity={0.5}
-          transmission={0.8}
-          thickness={0.5}
-          roughness={0.2}
-          metalness={0.25}
-        />
-      </Octahedron>
-    </group>
+    <Float speed={0.6 + speed * 0.4} rotationIntensity={0.7} floatIntensity={0.9}>
+      <group ref={groupRef}>
+        <Icosahedron args={[1.35, 1]}>
+          <meshPhysicalMaterial
+            color={primaryHex}
+            transparent
+            opacity={0.6}
+            transmission={0.9}
+            thickness={0.65}
+            roughness={0.12}
+            metalness={0.2}
+            clearcoat={0.4}
+          />
+          <Edges scale={1.02} color="rgba(255,255,255,0.3)" />
+        </Icosahedron>
+        <TorusKnot position={[2.8, 0, -0.5]} args={[0.7, 0.18, 220, 24]}>
+          <meshPhysicalMaterial
+            color={accentHex}
+            transparent
+            opacity={0.55}
+            transmission={0.7}
+            thickness={0.45}
+            roughness={0.18}
+            metalness={0.35}
+          />
+        </TorusKnot>
+        <Octahedron position={[-2.6, 0.3, 0.6]} args={[1, 0]}>
+          <meshPhysicalMaterial
+            color={`#${new THREE.Color(primaryHex).offsetHSL(-0.08, -0.02, 0.12).getHexString()}`}
+            transparent
+            opacity={0.45}
+            transmission={0.82}
+            thickness={0.5}
+            roughness={0.18}
+            metalness={0.22}
+          />
+          <Edges scale={1.05} color="rgba(255,255,255,0.25)" />
+        </Octahedron>
+        <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -1.6, 0]}> 
+          <ringGeometry args={[1.8, 2.5, 64]} />
+          <meshBasicMaterial color={accentHex} transparent opacity={0.2} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+    </Float>
   );
 }
 
@@ -352,13 +404,13 @@ function Scene3D({ enabled = true, type = "ANIMATED_SPHERE", color = "#0ea5e9", 
         gl={{ alpha: true }}
         style={{ pointerEvents: "none" }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 5]} intensity={1} />
-        <pointLight position={[-10, -10, -5]} intensity={0.5} color={color} />
+        <ambientLight intensity={0.4} color="#fef3c7" />
+        <directionalLight position={[8, 10, 6]} intensity={0.9} color="#fff6d5" />
+        <pointLight position={[-10, -10, -5]} intensity={0.45} color={color} />
 
         {renderScene()}
 
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        <Stars radius={100} depth={45} count={3600} factor={4} saturation={0} fade speed={1} />
 
         <Environment preset="night" />
         <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
