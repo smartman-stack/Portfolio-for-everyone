@@ -2,8 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../node_modules/@prisma/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -61,6 +60,10 @@ model StyleSettings {
   cursorStyle       CursorStyle @default(GLOW_WINDY)
   showCursor        Boolean   @default(true)
   align             Alignment @default(CENTER)
+  enable3DScene     Boolean   @default(true)
+  scene3DType       Scene3DType @default(ANIMATED_SPHERE)
+  scene3DColor      String    @default("#0ea5e9")
+  scene3DSpeed      Float     @default(1.0)
   portfolio         Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   portfolioId       Int       @unique
 }
@@ -74,6 +77,13 @@ enum CursorStyle {
   GLOW_WINDY
   GLOW_STRONG
   MINIMAL
+}
+
+enum Scene3DType {
+  ANIMATED_SPHERE
+  FLOATING_PARTICLES
+  GEOMETRIC_SHAPES
+  WAVE_MOTION
 }
 
 enum Alignment {

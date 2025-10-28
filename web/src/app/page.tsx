@@ -1,10 +1,17 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Scene3D from "@/components/Scene3D";
 
 function GlowCursor({ enabled = true, variant = "windy" as "windy" | "strong" | "minimal" }) {
+	const [mounted, setMounted] = useState(false);
+	
 	useEffect(() => {
-		if (!enabled) return;
+		setMounted(true);
+	}, []);
+	
+	useEffect(() => {
+		if (!mounted || !enabled) return;
 		const root = document.documentElement;
 		root.style.cursor = "none";
 		const el = document.createElement("div");
@@ -44,7 +51,9 @@ function GlowCursor({ enabled = true, variant = "windy" as "windy" | "strong" | 
 			document.removeEventListener("mousemove", onMove);
 			el.remove();
 		};
-	}, [enabled, variant]);
+	}, [mounted, enabled, variant]);
+	
+	if (!mounted) return null;
 	return null;
 }
 
@@ -66,6 +75,12 @@ export default function Home() {
 
 	return (
 		<div className="min-h-screen overflow-hidden" style={{ background: data?.styles?.secondaryColor || "#0b0b0b", color: "white" }}>
+			<Scene3D 
+				enabled={data?.styles?.enable3DScene ?? true}
+				type={data?.styles?.scene3DType || "ANIMATED_SPHERE"}
+				color={data?.styles?.scene3DColor || "#0ea5e9"}
+				speed={data?.styles?.scene3DSpeed || 1.0}
+			/>
 			{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
 			<nav className={`${navbarVertical ? "fixed left-0 top-0 h-screen w-20" : "w-full h-16"} flex items-center justify-center`} style={{ background: data?.styles?.primaryColor || "#0ea5e9" }}>
 				<ul className={`${navbarVertical ? "flex flex-col gap-4" : "flex gap-6"}`}>

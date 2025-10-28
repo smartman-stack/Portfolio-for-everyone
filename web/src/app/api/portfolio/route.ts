@@ -10,6 +10,10 @@ const StyleSettingsSchema = z.object({
 	cursorStyle: z.enum(["GLOW_WINDY", "GLOW_STRONG", "MINIMAL"]).optional(),
 	showCursor: z.boolean().optional(),
 	align: z.enum(["LEFT", "CENTER", "RIGHT"]).optional(),
+	enable3DScene: z.boolean().optional(),
+	scene3DType: z.enum(["ANIMATED_SPHERE", "FLOATING_PARTICLES", "GEOMETRIC_SHAPES", "WAVE_MOTION"]).optional(),
+	scene3DColor: z.string().optional(),
+	scene3DSpeed: z.number().optional(),
 });
 
 const SkillSchema = z.object({ id: z.number().optional(), name: z.string(), level: z.number().min(0).max(100).optional(), description: z.string().optional() });

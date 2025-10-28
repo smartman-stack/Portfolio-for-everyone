@@ -59,6 +59,17 @@ export default function HiddenAdmin() {
 						<option value="CENTER">Center</option>
 						<option value="RIGHT">Right</option>
 					</select>
+					
+					<h3 className="font-medium mt-4">3D Background Scene</h3>
+					<label className="inline-flex items-center gap-2"><input type="checkbox" checked={portfolio?.styles?.enable3DScene ?? true} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, enable3DScene: e.target.checked } })} /> Enable 3D Scene</label>
+					<select className="border p-2 w-full" value={portfolio?.styles?.scene3DType || "ANIMATED_SPHERE"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, scene3DType: e.target.value } })}>
+						<option value="ANIMATED_SPHERE">Animated Sphere</option>
+						<option value="FLOATING_PARTICLES">Floating Particles</option>
+						<option value="GEOMETRIC_SHAPES">Geometric Shapes</option>
+						<option value="WAVE_MOTION">Wave Motion</option>
+					</select>
+					<label className="block">3D Scene Color <input type="color" className="ml-2" value={portfolio?.styles?.scene3DColor || "#0ea5e9"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, scene3DColor: e.target.value } })} /></label>
+					<label className="block">Animation Speed <input type="range" min="0.1" max="3" step="0.1" className="w-full" value={portfolio?.styles?.scene3DSpeed || 1.0} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, scene3DSpeed: parseFloat(e.target.value) } })} /></label>
 				</section>
 				<section className="space-y-3 md:col-span-2">
 					<h2 className="font-medium">Skills</h2>
