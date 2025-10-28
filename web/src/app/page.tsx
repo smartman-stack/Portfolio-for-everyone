@@ -72,6 +72,17 @@ export default function Home() {
 		const c = data?.styles?.cursorStyle || "GLOW_WINDY";
 		return c === "GLOW_STRONG" ? "strong" : c === "MINIMAL" ? "minimal" : "windy";
 	}, [data]);
+	const normalizedDisplayName = useMemo(() => (data?.displayName || "").replace(/\s+/g, " ").trim(), [data?.displayName]);
+	const normalizedHeadline = useMemo(() => (data?.headline || "").replace(/\s+/g, " ").trim(), [data?.headline]);
+	const headlineLooksLikeLastName = normalizedHeadline !== "" && !normalizedHeadline.includes(" ");
+	const fullName = useMemo(() => {
+		if (!normalizedDisplayName && !normalizedHeadline) return "";
+		if (headlineLooksLikeLastName) {
+			return `${normalizedDisplayName} ${normalizedHeadline}`.trim();
+		}
+		return normalizedDisplayName;
+	}, [normalizedDisplayName, normalizedHeadline, headlineLooksLikeLastName]);
+	const secondaryHeadline = headlineLooksLikeLastName ? "" : normalizedHeadline;
 
 	// Return null on server to avoid hydration mismatch
 	if (!isMounted) return null;
@@ -90,8 +101,8 @@ export default function Home() {
 		<div className="relative z-10">
 			<main className="mx-auto max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16 py-24">
 				<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
-					<h1 className="text-4xl font-bold" style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{data?.displayName}</h1>
-					{data?.headline && <p className="text-lg opacity-90">{data.headline}</p>}
+					{fullName && <h1 className="text-4xl font-bold" style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{fullName}</h1>}
+					{secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>}
 					{data?.bio && <p className="max-w-2xl opacity-80">{data.bio}</p>}
 				</section>
 
