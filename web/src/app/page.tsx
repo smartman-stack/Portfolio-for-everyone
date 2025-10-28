@@ -123,8 +123,8 @@ export default function Home() {
 				speed={data?.styles?.scene3DSpeed || 1.0}
 			/>}
 			{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
-			<div className="relative z-10">
-				<main className="mx-auto max-w-6xl min-h-screen flex flex-col items-center justify-center gap-16 py-24 px-6">
+			<div className="relative z-10" suppressHydrationWarning>
+				<main className="mx-auto max-w-6xl min-h-screen flex flex-col items-center justify-center gap-16 py-24 px-6" suppressHydrationWarning>
 					<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
 						{fullName && (
 							<h1
@@ -147,7 +147,7 @@ export default function Home() {
 						)}
 					</section>
 
-					<section id="skills" className="w-full">
+					<section id="skills" className="w-full" suppressHydrationWarning>
 						<h2 className={`${pacifico.className} text-2xl mb-4`}>Skills</h2>
 						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 							{(data?.skills || []).map((s: any, i: number) => (
@@ -165,7 +165,7 @@ export default function Home() {
 						</div>
 					</section>
 
-					<section id="exp" className="w-full">
+					<section id="exp" className="w-full" suppressHydrationWarning>
 						<h2 className={`${pacifico.className} text-2xl mb-4`}>Experience</h2>
 						<div className="grid gap-5 md:grid-cols-2">
 							{(data?.experiences || []).map((e: any, i: number) => {
