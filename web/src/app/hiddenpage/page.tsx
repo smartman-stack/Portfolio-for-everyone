@@ -55,10 +55,6 @@ export default function HiddenAdmin() {
 				</section>
 				<section className="space-y-3">
 					<h2 className="font-medium">Styles</h2>
-					<select className="border p-2 w-full" value={portfolio?.styles?.navbarOrientation || "HORIZONTAL"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, navbarOrientation: e.target.value } })}>
-						<option value="HORIZONTAL">Horizontal</option>
-						<option value="VERTICAL">Vertical</option>
-					</select>
 					<label className="block">Primary <input type="color" className="ml-2" value={portfolio?.styles?.primaryColor || "#0ea5e9"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, primaryColor: e.target.value } })} /></label>
 					<label className="block">Secondary <input type="color" className="ml-2" value={portfolio?.styles?.secondaryColor || "#111827"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, secondaryColor: e.target.value } })} /></label>
 					<label className="block">Accent <input type="color" className="ml-2" value={portfolio?.styles?.accentColor || "#22d3ee"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, accentColor: e.target.value } })} /></label>
