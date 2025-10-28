@@ -80,7 +80,7 @@ export default function Home() {
 	if (loading) return <div className="min-h-screen flex items-center justify-center" suppressHydrationWarning>Loading…</div>;
 
 	return (
-		<div className="min-h-screen overflow-hidden" style={{ background: data?.styles?.secondaryColor || "#0b0b0b", color: "white" }} suppressHydrationWarning>
+		<div className="relative min-h-screen overflow-hidden" style={{ background: data?.styles?.secondaryColor || "#0b0b0b", color: "white" }} suppressHydrationWarning>
 			{isMounted && <Scene3D 
 				enabled={data?.styles?.enable3DScene ?? true}
 				type={data?.styles?.scene3DType || "ANIMATED_SPHERE"}

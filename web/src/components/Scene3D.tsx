@@ -134,16 +134,20 @@ function Scene3D({ enabled = true, type = "ANIMATED_SPHERE", color = "#0ea5e9", 
   };
 
   return (
-    <div className="fixed inset-0 -z-10">
-      <Canvas camera={{ position: [0, 0, 5], fov: 75 }}>
+    <div className="absolute inset-0 pointer-events-none -z-10">
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        gl={{ alpha: true }}
+        style={{ pointerEvents: "none" }}
+      >
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <pointLight position={[-10, -10, -5]} intensity={0.5} color={color} />
-        
+
         {renderScene()}
-        
+
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-        
+
         <Environment preset="night" />
         <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
       </Canvas>
