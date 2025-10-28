@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // bcrypt hash
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Portfolio {
+  id          Int           @id @default(autoincrement())
+  displayName String
+  headline    String?
+  bio         String?
+  photoUrl    String?
+  skills      Skill[]
+  experiences Experience[]
+  styles      StyleSettings?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Skill {
+  id          Int       @id @default(autoincrement())
+  name        String
+  level       Int?      // 1-100
+  description String?
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId Int
+}
+
+model Experience {
+  id          Int       @id @default(autoincrement())
+  title       String
+  company     String?
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId Int
+}
+
+model StyleSettings {
+  id                Int       @id @default(autoincrement())
+  navbarOrientation NavbarOrientation @default(HORIZONTAL)
+  primaryColor      String    @default("#0ea5e9")
+  secondaryColor    String    @default("#111827")
+  accentColor       String    @default("#22d3ee")
+  cursorStyle       CursorStyle @default(GLOW_WINDY)
+  showCursor        Boolean   @default(true)
+  align             Alignment @default(CENTER)
+  portfolio         Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolioId       Int       @unique
+}
+
+enum NavbarOrientation {
+  HORIZONTAL
+  VERTICAL
+}
+
+enum CursorStyle {
+  GLOW_WINDY
+  GLOW_STRONG
+  MINIMAL
+}
+
+enum Alignment {
+  LEFT
+  CENTER
+  RIGHT
+}
