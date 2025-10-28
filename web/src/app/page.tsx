@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { Pacifico } from "next/font/google";
 import Scene3D from "@/components/Scene3D";
+
+const pacifico = Pacifico({ subsets: ["latin"], weight: "400" });
 
 function GlowCursor({ enabled = true, variant = "windy" as "windy" | "strong" | "minimal" }) {
 	const [mounted, setMounted] = useState(false);
@@ -100,13 +103,13 @@ export default function Home() {
 		<div className="relative z-10">
 			<main className="mx-auto max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16 py-24">
 				<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
-					{fullName && <h1 className="text-4xl font-bold" style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{fullName}</h1>}
+					{fullName && <h1 className={`${pacifico.className} text-4xl font-bold`} style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{fullName}</h1>}
 					{secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>}
 					{data?.bio && <p className="max-w-2xl opacity-80">{data.bio}</p>}
 				</section>
 
 				<section id="skills" className="w-full">
-					<h2 className="text-2xl mb-4">Skills</h2>
+					<h2 className={`${pacifico.className} text-2xl mb-4`}>Skills</h2>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						{(data?.skills || []).map((s: any, i: number) => (
 							<div key={i} className="p-4 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition">
@@ -124,7 +127,7 @@ export default function Home() {
 				</section>
 
 				<section id="exp" className="w-full">
-					<h2 className="text-2xl mb-4">Experience</h2>
+					<h2 className={`${pacifico.className} text-2xl mb-4`}>Experience</h2>
 					<div className="space-y-3">
 						{(data?.experiences || []).map((e: any, i: number) => (
 							<details key={i} className="p-4 rounded border border-white/10 bg-white/5">

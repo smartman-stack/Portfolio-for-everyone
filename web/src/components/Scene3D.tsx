@@ -1,7 +1,17 @@
 "use client";
-import { useRef, useMemo, useEffect } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Sphere, MeshDistortMaterial, OrbitControls, Environment, Stars, Box, Torus } from "@react-three/drei";
+import {
+  Sphere,
+  OrbitControls,
+  Environment,
+  Stars,
+  Sparkles,
+  Icosahedron,
+  TorusKnot,
+  Octahedron,
+  useTexture,
+} from "@react-three/drei";
 import * as THREE from "three";
 
 interface Scene3DProps {
@@ -11,66 +21,149 @@ interface Scene3DProps {
   speed?: number;
 }
 
-function AnimatedSphere({ color = "#0ea5e9", speed = 1.0 }: { color?: string; speed?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
+function AnimatedSphere({ speed = 1.0 }: { speed?: number }) {
+  const earthRef = useRef<THREE.Mesh>(null);
+  const cloudsRef = useRef<THREE.Mesh>(null);
+  const [earthMap, normalMap, specularMap, cloudsMap] = useTexture(
+    [
+      "https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg",
+      "https://threejs.org/examples/textures/planets/earth_normal_2048.jpg",
+      "https://threejs.org/examples/textures/planets/earth_specular_2048.jpg",
+      "https://threejs.org/examples/textures/planets/earth_clouds_1024.png",
+    ],
+  );
+
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.1 * speed;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.15 * speed;
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5 * speed) * 0.5;
+    const t = state.clock.elapsedTime;
+    const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
+    if (earthRef.current) {
+      earthRef.current.rotation.y = t * 0.15 * effectiveSpeed;
+      earthRef.current.rotation.x = Math.sin(t * 0.05 * effectiveSpeed) * 0.15;
+    }
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y = t * 0.2 * effectiveSpeed;
     }
   });
 
   return (
-    <Sphere ref={meshRef} args={[1, 100, 200]} scale={2.4}>
-      <MeshDistortMaterial
-        color={color}
-        attach="material"
-        distort={0.3}
-        speed={1.5 * speed}
-        roughness={0.1}
-        metalness={0.8}
-      />
-    </Sphere>
+    <group position={[0, 0, 0]}>
+      <Sphere ref={earthRef} args={[1, 128, 128]} scale={2.6}>
+        <meshPhongMaterial
+          map={earthMap}
+          normalMap={normalMap}
+          specularMap={specularMap}
+          shininess={15}
+        />
+      </Sphere>
+      <Sphere ref={cloudsRef} args={[1.02, 64, 64]} scale={2.7}>
+        <meshPhongMaterial
+          map={cloudsMap}
+          transparent
+          opacity={0.5}
+          depthWrite={false}
+        />
+      </Sphere>
+    </group>
   );
 }
 
 function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string; speed?: number }) {
+  const groupRef = useRef<THREE.Group>(null);
   const points = useRef<THREE.Points>(null);
-
-  const particlesPosition = useMemo(() => {
+  const [starTexture, setStarTexture] = useState<THREE.Texture | null>(null);
+  const basePositions = useMemo(() => {
     const count = 1500;
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 10;
+      positions[i3] = (Math.random() - 0.5) * 14;
       positions[i3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i3 + 2] = (Math.random() - 0.5) * 10;
+      positions[i3 + 2] = (Math.random() - 0.5) * 14;
     }
     return positions;
   }, []);
+  const basePositionsRef = useRef<Float32Array>(basePositions.slice());
 
-  useFrame((state) => {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const size = 128;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, "rgba(255,255,255,1)");
+    gradient.addColorStop(0.25, "rgba(255,255,255,0.9)");
+    gradient.addColorStop(0.6, "rgba(255,255,255,0.3)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    setStarTexture(texture);
+    return () => {
+      texture.dispose();
+    };
+  }, []);
+
+  const pointerTarget = useRef(new THREE.Vector3());
+  const pointerCurrent = useRef(new THREE.Vector3());
+
+  useFrame((state, delta) => {
+    const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
+    pointerTarget.current.set(state.pointer.x * 4, state.pointer.y * 3, 0);
+    pointerCurrent.current.lerp(pointerTarget.current, 0.05);
+
+    if (groupRef.current) {
+      groupRef.current.position.x = pointerCurrent.current.x;
+      groupRef.current.position.y = pointerCurrent.current.y;
+      groupRef.current.rotation.y += delta * 0.4 * effectiveSpeed;
+      groupRef.current.rotation.x += delta * 0.25 * effectiveSpeed;
+    }
+
     if (points.current) {
-      const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
-      points.current.rotation.x = state.clock.elapsedTime * 0.05 * effectiveSpeed;
-      points.current.rotation.y = state.clock.elapsedTime * 0.075 * effectiveSpeed;
+      const positionsAttr = points.current.geometry.attributes.position;
+      const arr = positionsAttr.array as Float32Array;
+      const base = basePositionsRef.current;
+      const time = state.clock.elapsedTime * 0.6 * effectiveSpeed;
+      for (let i = 0; i < arr.length; i += 3) {
+        arr[i] = base[i] + Math.sin(time + base[i + 2]) * 0.2;
+        arr[i + 1] = base[i + 1] + Math.cos(time * 1.2 + base[i]) * 0.2;
+      }
+      positionsAttr.needsUpdate = true;
+      points.current.geometry.computeBoundingSphere();
     }
   });
 
   return (
-    <points ref={points} frustumCulled={false}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particlesPosition.length / 3}
-          array={particlesPosition}
-          itemSize={3}
+    <group ref={groupRef}>
+      <points ref={points} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={basePositions.length / 3}
+            array={basePositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.15}
+          color={color}
+          map={starTexture ?? undefined}
+          alphaTest={0.3}
+          transparent
+          depthWrite={false}
+          sizeAttenuation
         />
-      </bufferGeometry>
-      <pointsMaterial size={0.02} color={color} />
-    </points>
+      </points>
+      <Sparkles
+        count={120}
+        scale={[12, 8, 12]}
+        speed={0.3 + speed * 0.2}
+        opacity={0.5}
+        color={color}
+      />
+    </group>
   );
 }
 
@@ -86,15 +179,39 @@ function GeometricShapes({ color = "#0ea5e9", speed = 1.0 }: { color?: string; s
 
   return (
     <group ref={groupRef}>
-      <Box position={[-2, 0, 0]} args={[1, 1, 1]}>
-        <meshStandardMaterial color={color} />
-      </Box>
-      <Sphere position={[0, 0, 0]} args={[0.8, 32, 32]}>
-        <meshStandardMaterial color={color} />
-      </Sphere>
-      <Torus position={[2, 0, 0]} args={[0.6, 0.2, 16, 100]}>
-        <meshStandardMaterial color={color} />
-      </Torus>
+      <Icosahedron args={[1.3, 1]}>
+        <meshPhysicalMaterial
+          color={color}
+          transparent
+          opacity={0.55}
+          transmission={0.85}
+          thickness={0.6}
+          roughness={0.15}
+          metalness={0.2}
+        />
+      </Icosahedron>
+      <TorusKnot position={[2.6, 0, -0.5]} args={[0.7, 0.2, 180, 16]}>
+        <meshPhysicalMaterial
+          color={new THREE.Color(color).offsetHSL(0.08, 0, 0.1)}
+          transparent
+          opacity={0.65}
+          transmission={0.75}
+          thickness={0.4}
+          roughness={0.25}
+          metalness={0.3}
+        />
+      </TorusKnot>
+      <Octahedron position={[-2.4, 0.2, 0.6]} args={[1, 0]}>
+        <meshPhysicalMaterial
+          color={new THREE.Color(color).offsetHSL(-0.05, 0.05, 0.05)}
+          transparent
+          opacity={0.5}
+          transmission={0.8}
+          thickness={0.5}
+          roughness={0.2}
+          metalness={0.25}
+        />
+      </Octahedron>
     </group>
   );
 }
@@ -108,6 +225,8 @@ function WaveMotion({ color = "#0ea5e9", speed = 1.0 }: { color?: string; speed?
       const attr = meshRef.current.geometry.attributes.position;
       if (attr && attr.array) {
         basePositions.current = (attr.array as Float32Array).slice();
+        meshRef.current.rotation.x = -Math.PI / 2.4;
+        meshRef.current.geometry.computeBoundingSphere();
       }
     }
   }, []);
@@ -124,23 +243,31 @@ function WaveMotion({ color = "#0ea5e9", speed = 1.0 }: { color?: string; speed?
     const positions = attr.array as Float32Array;
     const base = basePositions.current;
     const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
-    const time = state.clock.elapsedTime * effectiveSpeed;
+    const time = state.clock.elapsedTime * 0.8 * effectiveSpeed;
 
     for (let i = 0; i < positions.length; i += 3) {
       const x = base[i];
       const y = base[i + 1];
-      positions[i + 2] = Math.sin(x + time) * 0.5 + Math.cos(y * 0.5 + time * 0.8) * 0.25;
+      positions[i + 2] = Math.sin(x * 0.8 + time) * 0.6 + Math.cos(y * 0.6 + time * 1.2) * 0.35;
     }
 
     attr.needsUpdate = true;
     meshRef.current.geometry.computeVertexNormals();
-    meshRef.current.geometry.boundingSphere = null;
+    meshRef.current.geometry.computeBoundingSphere();
   });
 
   return (
     <mesh ref={meshRef} frustumCulled={false}>
-      <planeGeometry args={[10, 10, 80, 80]} />
-      <meshStandardMaterial color={color} wireframe />
+      <planeGeometry args={[14, 14, 120, 120]} />
+      <meshPhysicalMaterial
+        color={color}
+        transparent
+        opacity={0.35}
+        transmission={0.9}
+        roughness={0.25}
+        thickness={0.4}
+        clearcoat={0.3}
+      />
     </mesh>
   );
 }
@@ -151,7 +278,7 @@ function Scene3D({ enabled = true, type = "ANIMATED_SPHERE", color = "#0ea5e9", 
   const renderScene = () => {
     switch (type) {
       case "ANIMATED_SPHERE":
-        return <AnimatedSphere color={color} speed={speed} />;
+        return <AnimatedSphere speed={speed} />;
       case "FLOATING_PARTICLES":
         return <FloatingParticles color={color} speed={speed} />;
       case "GEOMETRIC_SHAPES":

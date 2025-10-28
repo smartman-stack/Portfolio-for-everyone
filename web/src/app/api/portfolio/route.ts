@@ -46,7 +46,12 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
 	const json = await req.json().catch(() => null);
 	const parsed = PortfolioSchema.safeParse(json);
-	if (!parsed.success) return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+	if (!parsed.success) {
+		return NextResponse.json({
+			error: "Invalid payload",
+			details: parsed.error.flatten(),
+		}, { status: 400 });
+	}
 	const data = parsed.data;
 	// Upsert portfolio
 	const existing = await prisma.portfolio.findFirst();
