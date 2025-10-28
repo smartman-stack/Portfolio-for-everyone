@@ -88,14 +88,15 @@ export default function Home() {
 				speed={data?.styles?.scene3DSpeed || 1.0}
 			/>}
 			{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
-			<nav className={`${navbarVertical ? "fixed left-0 top-0 h-screen w-20" : "w-full h-16"} flex items-center justify-center`} style={{ background: data?.styles?.primaryColor || "#0ea5e9" }}>
-				<ul className={`${navbarVertical ? "flex flex-col gap-4" : "flex gap-6"}`}>
-					<li><a href="#about">About</a></li>
-					<li><a href="#skills">Skills</a></li>
-					<li><a href="#exp">Experience</a></li>
-				</ul>
-			</nav>
-			<main className={`mx-auto ${navbarVertical ? "pl-24" : "pt-16"} max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16`}>
+			<div className="relative z-10">
+				<nav className={`${navbarVertical ? "fixed left-0 top-0 h-screen w-20" : "w-full h-16"} flex items-center justify-center`} style={{ background: data?.styles?.primaryColor || "#0ea5e9" }}>
+					<ul className={`${navbarVertical ? "flex flex-col gap-4" : "flex gap-6"}`}>
+						<li><a href="#about">About</a></li>
+						<li><a href="#skills">Skills</a></li>
+						<li><a href="#exp">Experience</a></li>
+					</ul>
+				</nav>
+				<main className={`mx-auto ${navbarVertical ? "pl-24" : "pt-16"} max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16`}>
 				<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
 					{data?.photoUrl ? (
 						<div className="w-40 h-40 relative rounded-full overflow-hidden ring-2 ring-white/30">
@@ -139,7 +140,8 @@ export default function Home() {
 						))}
 					</div>
 				</section>
-			</main>
+				</main>
+			</div>
 		</div>
 	);
 }

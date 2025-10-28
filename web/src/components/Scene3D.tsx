@@ -134,7 +134,7 @@ function Scene3D({ enabled = true, type = "ANIMATED_SPHERE", color = "#0ea5e9", 
   };
 
   return (
-    <div className="absolute inset-0 pointer-events-none -z-10">
+    <div className="absolute inset-0 pointer-events-none z-0">
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
         gl={{ alpha: true }}
