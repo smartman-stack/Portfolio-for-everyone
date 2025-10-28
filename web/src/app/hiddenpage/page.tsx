@@ -14,6 +14,7 @@ export default function HiddenAdmin() {
 
 	const cardClass = "rounded-3xl border border-white/10 bg-white/5/80 backdrop-blur-xl shadow-[0_12px_40px_rgba(8,47,73,0.35)]";
 	const fieldClass = "w-full rounded-2xl border border-white/10 bg-white/10 px-4 py-3 text-sm text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-cyan-400/70 focus:border-cyan-300/70 transition";
+	const selectClass = `${fieldClass} option-contrast pr-8`;
 	const labelClass = "text-xs font-semibold uppercase tracking-[0.3em] text-white/50";
 	const toggleClass = "relative inline-flex h-9 w-16 flex-shrink-0 cursor-pointer items-center rounded-full border border-white/10 bg-white/10 transition peer-checked:bg-cyan-500/80";
 	const toggleDotClass = "absolute left-1 top-1 h-7 w-7 rounded-full bg-white shadow-md transition peer-checked:translate-x-7";
@@ -46,6 +47,7 @@ export default function HiddenAdmin() {
 			const sanitizePortfolio = (p: any) => {
 				if (!p) return p;
 				const trimOrUndefined = (value?: string | null) => {
+					if (value === undefined || value === null) return undefined;
 					if (typeof value !== "string") return value;
 					const trimmed = value.trim();
 					return trimmed === "" ? undefined : trimmed;
@@ -55,6 +57,9 @@ export default function HiddenAdmin() {
 					displayName: (p.displayName ?? "").toString().trim(),
 					headline: trimOrUndefined(p.headline),
 					bio: trimOrUndefined(p.bio),
+					contactEmail: trimOrUndefined(p.contactEmail),
+					contactPhone: trimOrUndefined(p.contactPhone),
+					contactLocation: trimOrUndefined(p.contactLocation),
 					styles: p.styles
 						? {
 							...p.styles,
@@ -133,10 +138,15 @@ export default function HiddenAdmin() {
 							<p className={labelClass}>Profile</p>
 							<h2 className={`${pacifico.className} text-xl`}>Identity</h2>
 						</div>
-						<div className="space-y-4">
+					<div className="space-y-4">
 							<input className={fieldClass} placeholder="Display name" value={portfolio?.displayName || ""} onChange={e => setPortfolio({ ...portfolio, displayName: e.target.value })} />
 							<input className={fieldClass} placeholder="Headline" value={portfolio?.headline || ""} onChange={e => setPortfolio({ ...portfolio, headline: e.target.value })} />
 							<textarea className={`${fieldClass} min-h-[140px] resize-none`} placeholder="Bio" value={portfolio?.bio || ""} onChange={e => setPortfolio({ ...portfolio, bio: e.target.value })} />
+						<div className="grid gap-3 sm:grid-cols-3">
+							<input className={fieldClass} placeholder="Contact email" value={portfolio?.contactEmail || ""} onChange={e => setPortfolio({ ...portfolio, contactEmail: e.target.value })} />
+							<input className={fieldClass} placeholder="Contact phone" value={portfolio?.contactPhone || ""} onChange={e => setPortfolio({ ...portfolio, contactPhone: e.target.value })} />
+							<input className={fieldClass} placeholder="Location" value={portfolio?.contactLocation || ""} onChange={e => setPortfolio({ ...portfolio, contactLocation: e.target.value })} />
+						</div>
 						</div>
 					</section>
 					<section className={`${cardClass} p-6 space-y-5`}>
@@ -159,7 +169,7 @@ export default function HiddenAdmin() {
 							</div>
 							<div className="space-y-2">
 								<p className="text-xs text-white/60">Layout Alignment</p>
-								<select className={fieldClass} value={portfolio?.styles?.align || "CENTER"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, align: e.target.value } })}>
+							<select className={selectClass} value={portfolio?.styles?.align || "CENTER"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, align: e.target.value } })}>
 									<option value="LEFT">Left</option>
 									<option value="CENTER">Center</option>
 									<option value="RIGHT">Right</option>
@@ -169,7 +179,7 @@ export default function HiddenAdmin() {
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<div className="space-y-2">
 								<p className="text-xs text-white/60">Cursor Style</p>
-								<select className={fieldClass} value={portfolio?.styles?.cursorStyle || "GLOW_WINDY"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, cursorStyle: e.target.value } })}>
+							<select className={selectClass} value={portfolio?.styles?.cursorStyle || "GLOW_WINDY"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, cursorStyle: e.target.value } })}>
 									<option value="GLOW_WINDY">Glow - Windy</option>
 									<option value="GLOW_STRONG">Glow - Strong</option>
 									<option value="MINIMAL">Minimal</option>
@@ -193,7 +203,7 @@ export default function HiddenAdmin() {
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<div className="space-y-2">
 								<p className="text-xs text-white/60">Scene Type</p>
-								<select className={fieldClass} value={portfolio?.styles?.scene3DType || "ANIMATED_SPHERE"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, scene3DType: e.target.value } })}>
+								<select className={selectClass} value={portfolio?.styles?.scene3DType || "ANIMATED_SPHERE"} onChange={e => setPortfolio({ ...portfolio, styles: { ...portfolio?.styles, scene3DType: e.target.value } })}>
 									<option value="ANIMATED_SPHERE">Animated Sphere</option>
 									<option value="FLOATING_PARTICLES">Floating Particles</option>
 									<option value="GEOMETRIC_SHAPES">Geometric Shapes</option>
@@ -257,13 +267,15 @@ export default function HiddenAdmin() {
 					</div>
 					<div className="space-y-4">
 						{(portfolio?.experiences || []).map((e: any, i: number) => (
-							<div key={i} className="grid gap-3 lg:grid-cols-[1.2fr_1fr_0.8fr_0.8fr_1.4fr_auto]">
+							<div key={i} className="grid gap-3 lg:grid-cols-[1.2fr_1fr_0.8fr_0.8fr]">
 								<input className={fieldClass} placeholder="Role" value={e.title} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], title: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
 								<input className={fieldClass} placeholder="Company" value={e.company || ""} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], company: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
 								<input className={fieldClass} type="date" value={e.startDate?.slice(0,10) || ""} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], startDate: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
 								<input className={fieldClass} type="date" value={e.endDate?.slice(0,10) || ""} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], endDate: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
-								<input className={fieldClass} placeholder="Highlights" value={e.description || ""} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], description: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
-								<button className="rounded-full border border-rose-500/40 px-4 py-2 text-sm text-rose-200 transition hover:bg-rose-500/15" onClick={() => setPortfolio({ ...portfolio, experiences: portfolio.experiences.filter((_: any, j: number) => j !== i) })}>Remove</button>
+								<textarea className={`${fieldClass} min-h-[120px] lg:col-span-4`} placeholder="Highlights" value={e.description || ""} onChange={ev => { const next = [...portfolio.experiences]; next[i] = { ...next[i], description: ev.target.value }; setPortfolio({ ...portfolio, experiences: next }); }} />
+								<div className="flex items-center lg:col-span-4">
+									<button className="ml-auto rounded-full border border-rose-500/40 px-4 py-2 text-sm text-rose-200 transition hover:bg-rose-500/15" onClick={() => setPortfolio({ ...portfolio, experiences: portfolio.experiences.filter((_: any, j: number) => j !== i) })}>Remove</button>
+								</div>
 							</div>
 						))}
 						<button className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-300/60 hover:bg-cyan-500/20" onClick={() => setPortfolio({ ...portfolio, experiences: [...(portfolio?.experiences || []), { title: "" }] })}>+ Add Experience</button>

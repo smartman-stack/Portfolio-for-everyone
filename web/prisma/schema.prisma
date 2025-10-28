@@ -23,6 +23,9 @@ model Portfolio {
   displayName String
   headline    String?
   bio         String?
+  contactEmail String?
+  contactPhone String?
+  contactLocation String?
   skills      Skill[]
   experiences Experience[]
   styles      StyleSettings?

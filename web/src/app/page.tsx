@@ -94,6 +94,20 @@ export default function Home() {
 			{char === " " ? "\u00A0" : char}
 		</span>
 	)), [fullName]);
+	const contactDetails = useMemo(() => {
+		const entries: { label: string; value: string }[] = [];
+		if (data?.contactEmail) entries.push({ label: "Email", value: data.contactEmail });
+		if (data?.contactPhone) entries.push({ label: "Phone", value: data.contactPhone });
+		if (data?.contactLocation) entries.push({ label: "Location", value: data.contactLocation });
+		return entries;
+	}, [data?.contactEmail, data?.contactPhone, data?.contactLocation]);
+
+	const formatDate = (iso?: string | null) => {
+		if (!iso) return null;
+		const date = new Date(iso);
+		if (Number.isNaN(date.getTime())) return null;
+		return new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }).format(date);
+	};
 
 	// Return null on server to avoid hydration mismatch
 	if (!isMounted) return null;
@@ -108,54 +122,72 @@ export default function Home() {
 				color={data?.styles?.scene3DColor || "#0ea5e9"}
 				speed={data?.styles?.scene3DSpeed || 1.0}
 			/>}
-		{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
-		<div className="relative z-10">
-			<main className="mx-auto max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16 py-24">
-			<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
-				{fullName && (
-					<h1
-						className={`${pacifico.className} text-4xl font-bold flex flex-wrap justify-center gap-1`}
-						style={{ color: data?.styles?.accentColor || "#22d3ee" }}
-					>
-						{glowName}
-					</h1>
-				)}
-					{secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>}
-					{data?.bio && <p className="max-w-2xl opacity-80">{data.bio}</p>}
-				</section>
-
-				<section id="skills" className="w-full">
-					<h2 className={`${pacifico.className} text-2xl mb-4`}>Skills</h2>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						{(data?.skills || []).map((s: any, i: number) => (
-							<div key={i} className="p-4 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition">
-								<div className="flex items-center justify-between">
-									<span className="font-medium">{s.name}</span>
-									<span className="text-sm opacity-80">{s.level ?? 0}%</span>
-								</div>
-								<div className="h-2 bg-white/10 rounded mt-2 overflow-hidden">
-									<div className="h-full bg-cyan-400" style={{ width: `${Math.min(100, Math.max(0, s.level ?? 0))}%` }} />
-								</div>
-								{s.description && <p className="mt-2 text-sm opacity-80">{s.description}</p>}
+			{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
+			<div className="relative z-10">
+				<main className="mx-auto max-w-6xl min-h-screen flex flex-col items-center justify-center gap-16 py-24 px-6">
+					<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
+						{fullName && (
+							<h1
+								className={`${pacifico.className} text-4xl font-bold flex flex-wrap justify-center gap-1`}
+								style={{ color: data?.styles?.accentColor || "#22d3ee" }}
+							>
+								{glowName}
+							</h1>
+						)}
+						{secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>}
+						{data?.bio && <p className="max-w-2xl mx-auto opacity-80 whitespace-pre-line">{data.bio}</p>}
+						{contactDetails.length > 0 && (
+							<div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-white/80">
+								{contactDetails.map(({ label, value }, idx) => (
+									<div key={`${label}-${idx}`} className="rounded-full border border-white/20 bg-white/5 px-4 py-2 backdrop-blur-md">
+										<span className="font-medium text-white/90">{label}:</span> <span>{value}</span>
+									</div>
+								))}
 							</div>
-						))}
-					</div>
-				</section>
+						)}
+					</section>
 
-				<section id="exp" className="w-full">
-					<h2 className={`${pacifico.className} text-2xl mb-4`}>Experience</h2>
-					<div className="space-y-3">
-						{(data?.experiences || []).map((e: any, i: number) => (
-							<details key={i} className="p-4 rounded border border-white/10 bg-white/5">
-								<summary className="cursor-pointer select-none">
-									<span className="font-medium">{e.title}</span>{" "}
-									<span className="opacity-80">{e.company}</span>
-								</summary>
-								{e.description && <p className="mt-2 opacity-90">{e.description}</p>}
-							</details>
-						))}
-					</div>
-				</section>
+					<section id="skills" className="w-full">
+						<h2 className={`${pacifico.className} text-2xl mb-4`}>Skills</h2>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							{(data?.skills || []).map((s: any, i: number) => (
+								<div key={i} className="p-4 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition">
+									<div className="flex items-center justify-between">
+										<span className="font-medium">{s.name}</span>
+										<span className="text-sm opacity-80">{s.level ?? 0}%</span>
+									</div>
+									<div className="h-2 bg-white/10 rounded mt-2 overflow-hidden">
+										<div className="h-full bg-cyan-400" style={{ width: `${Math.min(100, Math.max(0, s.level ?? 0))}%` }} />
+									</div>
+									{s.description && <p className="mt-2 text-sm opacity-80">{s.description}</p>}
+								</div>
+							))}
+						</div>
+					</section>
+
+					<section id="exp" className="w-full">
+						<h2 className={`${pacifico.className} text-2xl mb-4`}>Experience</h2>
+						<div className="grid gap-5 md:grid-cols-2">
+							{(data?.experiences || []).map((e: any, i: number) => {
+								const start = formatDate(e.startDate);
+								const end = formatDate(e.endDate) ?? "Present";
+								return (
+									<div key={i} className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md space-y-3">
+										<div className="flex flex-col gap-1">
+											<h3 className="text-lg font-semibold text-white/95">{e.title}</h3>
+											<p className="text-sm text-white/70">{e.company}</p>
+											{start && (
+												<p className="text-xs uppercase tracking-[0.3em] text-white/50">
+													{start} – {end}
+												</p>
+											)}
+										</div>
+										{e.description && <p className="text-sm opacity-90 whitespace-pre-line">{e.description}</p>}
+									</div>
+								);
+							})}
+						</div>
+					</section>
 				</main>
 			</div>
 		</div>

@@ -41,3 +41,8 @@ body {
   animation: glowPulse 3.2s ease-in-out infinite;
   will-change: filter, text-shadow;
 }
+
+.option-contrast option {
+  color: #0f172a;
+  background-color: #f8fafc;
+}
