@@ -6,9 +6,20 @@ export default function HiddenAdmin() {
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 
 	useEffect(() => {
-		fetch("/api/portfolio").then(r => r.json()).then(setPortfolio).finally(() => setLoading(false));
+		setIsMounted(true);
+		// Check if user is authenticated via localStorage
+		const session = localStorage.getItem("adminSession");
+		if (session === "true") {
+			setIsAuthenticated(true);
+			fetch("/api/portfolio").then(r => r.json()).then(setPortfolio).finally(() => setLoading(false));
+		} else {
+			// Redirect to login if not authenticated
+			window.location.href = "/login";
+		}
 	}, []);
 
 	async function save() {
@@ -26,6 +37,9 @@ export default function HiddenAdmin() {
 		}
 	}
 
+	// Only render after mounting to avoid hydration errors
+	if (!isMounted) return null;
+	if (!isAuthenticated) return <div className="p-6">Redirecting to login...</div>;
 	if (loading) return <div className="p-6">Loading…</div>;
 	return (
 		<div className="min-h-screen p-6 flex flex-col gap-6 bg-white text-black">
@@ -117,6 +131,11 @@ export default function HiddenAdmin() {
 			<div className="flex gap-3">
 				<button disabled={saving} onClick={save} className="bg-black text-white px-4 py-2 rounded disabled:opacity-50">{saving ? "Saving..." : "Save"}</button>
 				<a href="/" className="border px-4 py-2 rounded">Preview</a>
+				<button onClick={() => {
+					localStorage.removeItem("adminSession");
+					localStorage.removeItem("adminEmail");
+					window.location.href = "/login";
+				}} className="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
 			</div>
 		</div>
 	);

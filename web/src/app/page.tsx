@@ -60,7 +60,10 @@ function GlowCursor({ enabled = true, variant = "windy" as "windy" | "strong" | 
 export default function Home() {
 	const [data, setData] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
+	const [isMounted, setIsMounted] = useState(false);
+	
 	useEffect(() => {
+		setIsMounted(true);
 		fetch("/api/portfolio").then(r => r.json()).then(setData).finally(() => setLoading(false));
 	}, []);
 
@@ -71,16 +74,19 @@ export default function Home() {
 		return c === "GLOW_STRONG" ? "strong" : c === "MINIMAL" ? "minimal" : "windy";
 	}, [data]);
 
-	if (loading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+	// Return null on server to avoid hydration mismatch
+	if (!isMounted) return null;
+	
+	if (loading) return <div className="min-h-screen flex items-center justify-center" suppressHydrationWarning>Loading…</div>;
 
 	return (
-		<div className="min-h-screen overflow-hidden" style={{ background: data?.styles?.secondaryColor || "#0b0b0b", color: "white" }}>
-			<Scene3D 
+		<div className="min-h-screen overflow-hidden" style={{ background: data?.styles?.secondaryColor || "#0b0b0b", color: "white" }} suppressHydrationWarning>
+			{isMounted && <Scene3D 
 				enabled={data?.styles?.enable3DScene ?? true}
 				type={data?.styles?.scene3DType || "ANIMATED_SPHERE"}
 				color={data?.styles?.scene3DColor || "#0ea5e9"}
 				speed={data?.styles?.scene3DSpeed || 1.0}
-			/>
+			/>}
 			{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
 			<nav className={`${navbarVertical ? "fixed left-0 top-0 h-screen w-20" : "w-full h-16"} flex items-center justify-center`} style={{ background: data?.styles?.primaryColor || "#0ea5e9" }}>
 				<ul className={`${navbarVertical ? "flex flex-col gap-4" : "flex gap-6"}`}>

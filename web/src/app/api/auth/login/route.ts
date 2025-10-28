@@ -26,6 +26,13 @@ export async function POST(req: NextRequest) {
 	if (!ok) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 	const token = signAuthToken({ uid: user.id, email: user.email });
 	const res = NextResponse.json({ ok: true });
-	res.cookies.set("auth", token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 7 });
+	res.cookies.set("auth", token, { 
+		httpOnly: true, 
+		sameSite: "lax", 
+		path: "/", 
+		maxAge: 60 * 60 * 24 * 7,
+		secure: false // Add this for localhost development
+	});
+	console.log("Login successful, token set:", { uid: user.id, email: user.email, tokenLength: token.length });
 	return res;
 }

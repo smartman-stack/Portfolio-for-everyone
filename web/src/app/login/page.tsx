@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -7,7 +7,12 @@ export default function LoginPage() {
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 	const router = useRouter();
+
+	useEffect(() => {
+		setIsMounted(true);
+	}, []);
 
 	async function onSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -20,17 +25,22 @@ export default function LoginPage() {
 			setError(j?.error || "Login failed");
 			return;
 		}
+		// Store session in localStorage for simpler management
+		localStorage.setItem("adminSession", "true");
+		localStorage.setItem("adminEmail", email);
 		router.push("/hiddenpage");
 	}
 
+	if (!isMounted) return null;
+
 	return (
-		<div className="min-h-screen flex items-center justify-center p-4">
-			<form onSubmit={onSubmit} className="w-full max-w-sm space-y-3 border p-6 rounded">
-				<h1 className="text-xl font-semibold">Admin Login</h1>
+		<div className="min-h-screen flex items-center justify-center p-4" suppressHydrationWarning>
+			<form onSubmit={onSubmit} className="w-full max-w-sm space-y-3 border p-6 rounded" suppressHydrationWarning>
+				<h1 className="text-xl font-semibold" suppressHydrationWarning>Admin Login</h1>
 				{error && <p className="text-red-600">{error}</p>}
-				<input className="border p-2 w-full" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-				<input className="border p-2 w-full" placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-				<button disabled={loading} className="bg-black text-white w-full py-2 rounded">{loading ? "Loading…" : "Login"}</button>
+				<input className="border p-2 w-full" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} suppressHydrationWarning />
+				<input className="border p-2 w-full" placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} suppressHydrationWarning />
+				<button disabled={loading} className="bg-black text-white w-full py-2 rounded" suppressHydrationWarning>{loading ? "Loading…" : "Login"}</button>
 			</form>
 		</div>
 	);
