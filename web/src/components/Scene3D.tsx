@@ -49,15 +49,15 @@ function AnimatedSphere({ speed = 1.0 }: { speed?: number }) {
 
   return (
     <group position={[0, 0, 0]}>
-      <pointLight position={[0, 0, 3]} intensity={1.1} color="#ffd166" distance={8} decay={2.2} />
+      <pointLight position={[0, 0, 3]} intensity={0.75} color="#ffd166" distance={6} decay={2} />
       <Sphere ref={earthRef} args={[1, 128, 128]} scale={2.55}>
         <meshPhongMaterial
           map={earthMap}
           normalMap={normalMap}
           specularMap={specularMap}
-          shininess={22}
-          emissive="#1b2a44"
-          emissiveIntensity={0.45}
+          shininess={18}
+          emissive="#0a1628"
+          emissiveIntensity={0.18}
         />
       </Sphere>
       <Sphere ref={cloudsRef} args={[1.01, 64, 64]} scale={2.65}>
@@ -66,24 +66,6 @@ function AnimatedSphere({ speed = 1.0 }: { speed?: number }) {
           transparent
           opacity={0.45}
           depthWrite={false}
-        />
-      </Sphere>
-      <Sphere args={[1.1, 48, 48]} scale={2.9}>
-        <meshBasicMaterial
-          color="#ffd166"
-          transparent
-          opacity={0.18}
-          blending={THREE.AdditiveBlending}
-          side={THREE.BackSide}
-        />
-      </Sphere>
-      <Sphere args={[1.12, 48, 48]} scale={3.05}>
-        <meshBasicMaterial
-          color="#ff9f1c"
-          transparent
-          opacity={0.1}
-          blending={THREE.AdditiveBlending}
-          side={THREE.BackSide}
         />
       </Sphere>
     </group>

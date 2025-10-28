@@ -139,6 +139,11 @@ export default function Home() {
 		return entries;
 	}, [data?.contactEmail, data?.contactPhone, data?.contactLocation]);
 	const summaryPhrases = useMemo(() => {
+		const custom = (data?.summarySnippets || "")
+			.split(/\r?\n+/)
+			.map(snippet => snippet.trim())
+			.filter(Boolean);
+		if (custom.length) return custom;
 		const phrases: string[] = [];
 		if (data?.headline) phrases.push(data.headline.trim());
 		if (data?.bio) {
@@ -152,7 +157,7 @@ export default function Home() {
 		});
 		const unique = Array.from(new Set(phrases.filter(Boolean)));
 		return unique.length ? unique : ["a fullstack engineer", "building immersive digital experiences", "pushing the web forward"];
-	}, [data?.headline, data?.bio, data?.experiences]);
+	}, [data?.summarySnippets, data?.headline, data?.bio, data?.experiences]);
 
 	useEffect(() => {
 		if (!isMounted) return;

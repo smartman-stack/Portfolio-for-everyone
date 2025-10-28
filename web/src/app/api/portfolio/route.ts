@@ -27,6 +27,7 @@ const PortfolioSchema = z.object({
 	contactEmail: z.string().optional(),
 	contactPhone: z.string().optional(),
 	contactLocation: z.string().optional(),
+	summarySnippets: z.string().optional(),
 	skills: z.array(SkillSchema).default([]),
 	experiences: z.array(ExperienceSchema).default([]),
 	styles: StyleSettingsSchema.optional(),
@@ -66,6 +67,7 @@ export async function PUT(req: NextRequest) {
 			contactEmail: data.contactEmail,
 			contactPhone: data.contactPhone,
 			contactLocation: data.contactLocation,
+			summarySnippets: data.summarySnippets,
 			skills: { create: data.skills?.map(s => ({ name: s.name, level: s.level, description: s.description })) ?? [] },
 			experiences: { create: data.experiences?.map(e => ({ title: e.title, company: e.company, description: e.description, startDate: e.startDate ? new Date(e.startDate) : undefined, endDate: e.endDate ? new Date(e.endDate) : undefined })) ?? [] },
 			styles: data.styles ? { create: data.styles } : undefined,
@@ -77,6 +79,7 @@ export async function PUT(req: NextRequest) {
 			contactEmail: data.contactEmail,
 			contactPhone: data.contactPhone,
 			contactLocation: data.contactLocation,
+			summarySnippets: data.summarySnippets,
 			skills: {
 				deleteMany: {},
 				create: data.skills?.map(s => ({ name: s.name, level: s.level, description: s.description })) ?? [],

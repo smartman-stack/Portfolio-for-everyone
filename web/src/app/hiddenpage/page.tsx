@@ -60,6 +60,7 @@ export default function HiddenAdmin() {
 					contactEmail: trimOrUndefined(p.contactEmail),
 					contactPhone: trimOrUndefined(p.contactPhone),
 					contactLocation: trimOrUndefined(p.contactLocation),
+					summarySnippets: trimOrUndefined(p.summarySnippets),
 					styles: p.styles
 						? {
 							...p.styles,
@@ -138,7 +139,7 @@ export default function HiddenAdmin() {
 							<p className={labelClass}>Profile</p>
 							<h2 className={`${pacifico.className} text-xl`}>Identity</h2>
 						</div>
-					<div className="space-y-4">
+						<div className="space-y-4">
 							<input className={fieldClass} placeholder="Display name" value={portfolio?.displayName || ""} onChange={e => setPortfolio({ ...portfolio, displayName: e.target.value })} />
 							<input className={fieldClass} placeholder="Headline" value={portfolio?.headline || ""} onChange={e => setPortfolio({ ...portfolio, headline: e.target.value })} />
 							<textarea className={`${fieldClass} min-h-[140px] resize-none`} placeholder="Bio" value={portfolio?.bio || ""} onChange={e => setPortfolio({ ...portfolio, bio: e.target.value })} />
@@ -147,6 +148,7 @@ export default function HiddenAdmin() {
 							<input className={fieldClass} placeholder="Contact phone" value={portfolio?.contactPhone || ""} onChange={e => setPortfolio({ ...portfolio, contactPhone: e.target.value })} />
 							<input className={fieldClass} placeholder="Location" value={portfolio?.contactLocation || ""} onChange={e => setPortfolio({ ...portfolio, contactLocation: e.target.value })} />
 						</div>
+							<textarea className={`${fieldClass} min-h-[120px]`} placeholder={`Intro phrases (one per line)${"\n"}Example:${"\n"}Full-stack engineer${"\n"}AI enthusiast${"\n"}Open-source maintainer`} value={portfolio?.summarySnippets || ""} onChange={e => setPortfolio({ ...portfolio, summarySnippets: e.target.value })} />
 						</div>
 					</section>
 					<section className={`${cardClass} p-6 space-y-5`}>

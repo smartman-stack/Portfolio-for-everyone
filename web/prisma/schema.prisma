@@ -26,6 +26,7 @@ model Portfolio {
   contactEmail String?
   contactPhone String?
   contactLocation String?
+  summarySnippets String?
   skills      Skill[]
   experiences Experience[]
   styles      StyleSettings?
