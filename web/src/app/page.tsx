@@ -90,11 +90,6 @@ export default function Home() {
 		<div className="relative z-10">
 			<main className="mx-auto max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16 py-24">
 				<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
-					{data?.photoUrl ? (
-						<div className="w-40 h-40 relative rounded-full overflow-hidden ring-2 ring-white/30">
-							<Image src={data.photoUrl} alt={data.displayName} fill sizes="160px" style={{ objectFit: "cover" }} />
-						</div>
-					) : null}
 					<h1 className="text-4xl font-bold" style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{data?.displayName}</h1>
 					{data?.headline && <p className="text-lg opacity-90">{data.headline}</p>}
 					{data?.bio && <p className="max-w-2xl opacity-80">{data.bio}</p>}
