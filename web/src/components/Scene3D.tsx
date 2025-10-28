@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Sphere, MeshDistortMaterial, OrbitControls, Environment, Stars, Box, Torus } from "@react-three/drei";
 import * as THREE from "three";
@@ -38,24 +38,29 @@ function AnimatedSphere({ color = "#0ea5e9", speed = 1.0 }: { color?: string; sp
 
 function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string; speed?: number }) {
   const points = useRef<THREE.Points>(null);
-  
+
   const particlesPosition = useMemo(() => {
-    const positions = new Float32Array(2000);
-    for (let i = 0; i < 2000; i++) {
-      positions[i] = (Math.random() - 0.5) * 10;
+    const count = 1500;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 10;
+      positions[i3 + 1] = (Math.random() - 0.5) * 10;
+      positions[i3 + 2] = (Math.random() - 0.5) * 10;
     }
     return positions;
   }, []);
 
   useFrame((state) => {
     if (points.current) {
-      points.current.rotation.x = state.clock.elapsedTime * 0.05 * speed;
-      points.current.rotation.y = state.clock.elapsedTime * 0.075 * speed;
+      const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
+      points.current.rotation.x = state.clock.elapsedTime * 0.05 * effectiveSpeed;
+      points.current.rotation.y = state.clock.elapsedTime * 0.075 * effectiveSpeed;
     }
   });
 
   return (
-    <points ref={points}>
+    <points ref={points} frustumCulled={false}>
       <bufferGeometry>
         <bufferAttribute
           attach="attributes-position"
@@ -96,20 +101,45 @@ function GeometricShapes({ color = "#0ea5e9", speed = 1.0 }: { color?: string; s
 
 function WaveMotion({ color = "#0ea5e9", speed = 1.0 }: { color?: string; speed?: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
+  const basePositions = useRef<Float32Array | null>(null);
+
+  useEffect(() => {
     if (meshRef.current) {
-      const positions = meshRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i = 0; i < positions.length; i += 3) {
-        positions[i + 2] = Math.sin(positions[i] + state.clock.elapsedTime * speed) * 0.5;
+      const attr = meshRef.current.geometry.attributes.position;
+      if (attr && attr.array) {
+        basePositions.current = (attr.array as Float32Array).slice();
       }
-      meshRef.current.geometry.attributes.position.needsUpdate = true;
     }
+  }, []);
+
+  useFrame((state) => {
+    if (!meshRef.current) return;
+    const attr = meshRef.current.geometry.attributes.position;
+    if (!attr) return;
+
+    if (!basePositions.current) {
+      basePositions.current = (attr.array as Float32Array).slice();
+    }
+
+    const positions = attr.array as Float32Array;
+    const base = basePositions.current;
+    const effectiveSpeed = Number.isFinite(speed) ? speed : 1.0;
+    const time = state.clock.elapsedTime * effectiveSpeed;
+
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = base[i];
+      const y = base[i + 1];
+      positions[i + 2] = Math.sin(x + time) * 0.5 + Math.cos(y * 0.5 + time * 0.8) * 0.25;
+    }
+
+    attr.needsUpdate = true;
+    meshRef.current.geometry.computeVertexNormals();
+    meshRef.current.geometry.boundingSphere = null;
   });
 
   return (
-    <mesh ref={meshRef}>
-      <planeGeometry args={[10, 10, 50, 50]} />
+    <mesh ref={meshRef} frustumCulled={false}>
+      <planeGeometry args={[10, 10, 80, 80]} />
       <meshStandardMaterial color={color} wireframe />
     </mesh>
   );

@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import Scene3D from "@/components/Scene3D";
 
 function GlowCursor({ enabled = true, variant = "windy" as "windy" | "strong" | "minimal" }) {
