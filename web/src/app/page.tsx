@@ -85,6 +85,15 @@ export default function Home() {
 		return normalizedDisplayName;
 	}, [normalizedDisplayName, normalizedHeadline, headlineLooksLikeLastName]);
 	const secondaryHeadline = headlineLooksLikeLastName ? "" : normalizedHeadline;
+	const glowName = useMemo(() => fullName.split("").map((char, index) => (
+		<span
+			key={`${char}-${index}`}
+			className="glow-letter"
+			style={{ animationDelay: `${index * 0.08}s` }}
+		>
+			{char === " " ? "\u00A0" : char}
+		</span>
+	)), [fullName]);
 
 	// Return null on server to avoid hydration mismatch
 	if (!isMounted) return null;
@@ -102,8 +111,15 @@ export default function Home() {
 		{showCursor && <GlowCursor variant={cursorVariant as any} enabled />}
 		<div className="relative z-10">
 			<main className="mx-auto max-w-5xl min-h-screen flex flex-col items-center justify-center gap-16 py-24">
-				<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
-					{fullName && <h1 className={`${pacifico.className} text-4xl font-bold`} style={{ color: data?.styles?.accentColor || "#22d3ee" }}>{fullName}</h1>}
+			<section id="about" className="text-center space-y-4" style={{ textAlign: (data?.styles?.align || "CENTER").toLowerCase() as any }}>
+				{fullName && (
+					<h1
+						className={`${pacifico.className} text-4xl font-bold flex flex-wrap justify-center gap-1`}
+						style={{ color: data?.styles?.accentColor || "#22d3ee" }}
+					>
+						{glowName}
+					</h1>
+				)}
 					{secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>}
 					{data?.bio && <p className="max-w-2xl opacity-80">{data.bio}</p>}
 				</section>

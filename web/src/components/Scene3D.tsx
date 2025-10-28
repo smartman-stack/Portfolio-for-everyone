@@ -69,20 +69,26 @@ function AnimatedSphere({ speed = 1.0 }: { speed?: number }) {
 
 function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string; speed?: number }) {
   const groupRef = useRef<THREE.Group>(null);
-  const points = useRef<THREE.Points>(null);
+  const midLayerRef = useRef<THREE.Points>(null);
+  const fineLayerRef = useRef<THREE.Points>(null);
   const [starTexture, setStarTexture] = useState<THREE.Texture | null>(null);
-  const basePositions = useMemo(() => {
-    const count = 1500;
+  const [sparkTexture, setSparkTexture] = useState<THREE.Texture | null>(null);
+
+  const createPositions = (count: number, spread: THREE.Vector3) => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 14;
-      positions[i3 + 1] = (Math.random() - 0.5) * 10;
-      positions[i3 + 2] = (Math.random() - 0.5) * 14;
+      positions[i3] = (Math.random() - 0.5) * spread.x;
+      positions[i3 + 1] = (Math.random() - 0.5) * spread.y;
+      positions[i3 + 2] = (Math.random() - 0.5) * spread.z;
     }
     return positions;
-  }, []);
-  const basePositionsRef = useRef<Float32Array>(basePositions.slice());
+  };
+
+  const midPositions = useMemo(() => createPositions(1200, new THREE.Vector3(16, 10, 16)), []);
+  const finePositions = useMemo(() => createPositions(2400, new THREE.Vector3(18, 12, 18)), []);
+  const midBaseRef = useRef<Float32Array>(midPositions.slice());
+  const fineBaseRef = useRef<Float32Array>(finePositions.slice());
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -106,6 +112,28 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const size = 64;
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0, "rgba(255,255,255,0.95)");
+    gradient.addColorStop(0.2, "rgba(255,255,255,0.7)");
+    gradient.addColorStop(0.6, "rgba(255,200,200,0.2)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    setSparkTexture(texture);
+    return () => {
+      texture.dispose();
+    };
+  }, []);
+
   const pointerTarget = useRef(new THREE.Vector3());
   const pointerCurrent = useRef(new THREE.Vector3());
 
@@ -121,47 +149,74 @@ function FloatingParticles({ color = "#22d3ee", speed = 1.0 }: { color?: string;
       groupRef.current.rotation.x += delta * 0.25 * effectiveSpeed;
     }
 
-    if (points.current) {
-      const positionsAttr = points.current.geometry.attributes.position;
+    const updateLayer = (ref: { current: THREE.Points | null }, base: { current: Float32Array }, amp: number, freqMul = 1) => {
+      if (!ref.current) return;
+      const positionsAttr = ref.current.geometry.attributes.position;
       const arr = positionsAttr.array as Float32Array;
-      const base = basePositionsRef.current;
-      const time = state.clock.elapsedTime * 0.6 * effectiveSpeed;
+      const basePositions = base.current;
+      const time = state.clock.elapsedTime * 0.8 * effectiveSpeed * freqMul;
       for (let i = 0; i < arr.length; i += 3) {
-        arr[i] = base[i] + Math.sin(time + base[i + 2]) * 0.2;
-        arr[i + 1] = base[i + 1] + Math.cos(time * 1.2 + base[i]) * 0.2;
+        arr[i] = basePositions[i] + Math.sin(time + basePositions[i + 2] * 0.6) * amp;
+        arr[i + 1] = basePositions[i + 1] + Math.cos(time * 1.3 + basePositions[i] * 0.5) * amp;
+        arr[i + 2] = basePositions[i + 2] + Math.sin(time * 0.8 + basePositions[i] * 0.4) * amp * 0.6;
       }
       positionsAttr.needsUpdate = true;
-      points.current.geometry.computeBoundingSphere();
-    }
+      ref.current.geometry.computeBoundingSphere();
+    };
+
+    updateLayer(midLayerRef, midBaseRef, 0.18, 1);
+    updateLayer(fineLayerRef, fineBaseRef, 0.12, 1.35);
   });
 
   return (
     <group ref={groupRef}>
-      <points ref={points} frustumCulled={false}>
+      <points ref={midLayerRef} frustumCulled={false}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={basePositions.length / 3}
-            array={basePositions}
+            count={midPositions.length / 3}
+            array={midPositions}
             itemSize={3}
           />
         </bufferGeometry>
         <pointsMaterial
-          size={0.15}
-          color={color}
+          size={0.075}
+          color={new THREE.Color(color).offsetHSL(0.02, 0.1, 0.05)}
           map={starTexture ?? undefined}
-          alphaTest={0.3}
+          alphaTest={0.25}
           transparent
           depthWrite={false}
+          blending={THREE.AdditiveBlending}
+          sizeAttenuation
+        />
+      </points>
+      <points ref={fineLayerRef} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={finePositions.length / 3}
+            array={finePositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial
+          size={0.045}
+          color={new THREE.Color(color).offsetHSL(-0.04, -0.05, 0.1)}
+          map={sparkTexture ?? starTexture ?? undefined}
+          alphaTest={0.2}
+          transparent
+          depthWrite={false}
+          blending={THREE.AdditiveBlending}
           sizeAttenuation
         />
       </points>
       <Sparkles
-        count={120}
-        scale={[12, 8, 12]}
-        speed={0.3 + speed * 0.2}
-        opacity={0.5}
+        count={160}
+        scale={[14, 10, 14]}
+        speed={0.35 + speed * 0.25}
+        opacity={0.45}
         color={color}
+        size={3}
       />
     </group>
   );
