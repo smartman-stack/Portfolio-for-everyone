@@ -265,43 +265,83 @@ export default function Home() {
 					</section>
 
 					<section id="skills" className="w-full" suppressHydrationWarning>
-						<h2 className={`${pacifico.className} text-2xl mb-4`}>Skills</h2>
-						<div className="flex flex-wrap justify-center gap-9">
+						<h2 className={`${pacifico.className} text-3xl mb-10 text-center`}>Skills</h2>
+						<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-8">
 							{(data?.skills || []).map((s: any, i: number) => {
 								const levelValue = Math.min(100, Math.max(0, s.level ?? 0));
-								const radius = 56;
+								const radius = 58;
 								const circumference = 2 * Math.PI * radius;
 								const offset = circumference * (1 - levelValue / 100);
+								const accentColor = data?.styles?.accentColor || "#22d3ee";
 								return (
-									<div key={i} className="flex flex-col items-center gap-3">
-										<div className="relative w-32 h-32">
-											<svg viewBox="0 0 140 140" className="w-full h-full -rotate-90">
+									<div
+										key={i}
+										className="group relative flex flex-col items-center gap-4 p-6 rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] backdrop-blur-sm hover:border-white/25 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/5 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2"
+										style={{
+											boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+										}}
+									>
+										<div className="relative w-36 h-36">
+											<svg viewBox="0 0 150 150" className="w-full h-full -rotate-90 drop-shadow-[0_0_20px_rgba(34,211,238,0.4)]">
 												<defs>
 													<linearGradient id={`skillGradient-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
-														<stop offset="0%" stopColor={data?.styles?.accentColor || "#22d3ee"} stopOpacity="0.95" />
-														<stop offset="100%" stopColor="#f59e0b" stopOpacity="0.8" />
+														<stop offset="0%" stopColor={accentColor} stopOpacity="1" />
+														<stop offset="50%" stopColor="#f59e0b" stopOpacity="0.95" />
+														<stop offset="100%" stopColor="#ef4444" stopOpacity="0.9" />
 													</linearGradient>
+													<filter id={`skillGlow-${i}`}>
+														<feGaussianBlur stdDeviation="3" result="coloredBlur" />
+														<feMerge>
+															<feMergeNode in="coloredBlur" />
+															<feMergeNode in="SourceGraphic" />
+														</feMerge>
+													</filter>
 												</defs>
-												<circle cx="70" cy="70" r={radius} stroke="rgba(255,255,255,0.15)" strokeWidth="12" fill="transparent" />
 												<circle
-													cx="70"
-													cy="70"
+													cx="75"
+													cy="75"
+													r={radius}
+													stroke="rgba(255,255,255,0.08)"
+													strokeWidth="14"
+													fill="transparent"
+												/>
+												<circle
+													cx="75"
+													cy="75"
 													r={radius}
 													stroke={`url(#skillGradient-${i})`}
-													strokeWidth="12"
+													strokeWidth="14"
 													strokeLinecap="round"
 													strokeDasharray={circumference.toString()}
 													strokeDashoffset={offset.toString()}
 													fill="transparent"
+													filter={`url(#skillGlow-${i})`}
+													className="transition-all duration-700"
 												/>
 											</svg>
-											<div className="absolute inset-0 rotate-90 flex flex-col items-center justify-center">
-												<span className="text-2xl font-semibold">{levelValue}%</span>
+											<div className="absolute inset-0 rotate-90 flex flex-col items-center justify-center pointer-events-none">
+												<span className="text-3xl font-bold bg-gradient-to-br from-white via-white/95 to-white/80 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+													{levelValue}
+												</span>
+												<span className="text-xs font-semibold text-white/60 mt-0.5">%</span>
 											</div>
+											<div className="absolute -inset-2 rounded-full bg-gradient-to-r from-cyan-400/0 via-cyan-400/30 to-cyan-400/0 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 										</div>
-										<div className="max-w-[12rem] text-center space-y-1">
-											<h3 className="text-base font-medium">{s.name}</h3>
-											{s.description && <p className="text-sm text-white/70 whitespace-pre-line">{s.description}</p>}
+										<div className="text-center space-y-2 w-full">
+											<h3 className="text-lg font-semibold text-white/95 group-hover:text-white transition-colors">
+												{s.name}
+											</h3>
+											{s.description && (
+												<p className="text-xs text-white/60 leading-relaxed px-2 line-clamp-2 group-hover:text-white/75 transition-colors">
+													{s.description}
+												</p>
+											)}
+											<div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
+												<div
+													className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-amber-400 to-red-400 transition-all duration-1000 ease-out"
+													style={{ width: `${levelValue}%` }}
+												/>
+											</div>
 										</div>
 									</div>
 								);
