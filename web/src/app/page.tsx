@@ -243,17 +243,15 @@ export default function Home() {
 								{glowName}
 							</h1>
 						)}
-						<div className="min-h-[1.75rem]">
-							{summaryPhrases.length > 0 ? (
-								<p className="text-lg font-light text-white/80" aria-live="polite">
-									<span className="opacity-70">I am </span>
-									<span className="font-semibold text-white/90">{isMounted ? summaryText : summaryPhrases[0]}</span>
-									<span className="ml-1 inline-block h-6 w-[2px] align-middle bg-white/80 animate-pulse" />
-								</p>
-							) : (
-								secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>
-							)}
-						</div>
+						{summaryPhrases.length > 0 ? (
+							<p className="text-lg font-light text-white/80 flex flex-wrap justify-center items-center gap-2" aria-live="polite">
+								<span className="opacity-70">I am</span>
+								<span className="font-semibold text-white/90" style={{ minWidth: "8ch" }}>{isMounted ? summaryText : summaryPhrases[0]}</span>
+								<span className="inline-block h-6 w-[2px] bg-white/80 animate-pulse" />
+							</p>
+						) : (
+							secondaryHeadline && <p className="text-lg opacity-90">{secondaryHeadline}</p>
+						)}
 						{data?.bio && <p className="max-w-2xl mx-auto opacity-80 whitespace-pre-line">{data.bio}</p>}
 						{contactDetails.length > 0 && (
 							<div className="mt-6 flex flex-wrap justify-center gap-4 text-sm text-white/80">
